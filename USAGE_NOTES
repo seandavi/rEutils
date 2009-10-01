@@ -27,6 +27,22 @@ res2 = eSummary(esumquery)
 ### XML, but you can use XML tools to parse
 ### out what you want.
 
+library(annotate)
+### Using EFETCH
+### Note the power of the parser parameter!
+### A "parser" must be a function that takes
+### a string representing a URL and then reads from it
+### Also note how the result (res) from a previous search
+### is used as the basis for the fetch
+efr2 = eFetch(res,parser=function(x) {tmp = xmlTreeParse(x);return(xmlApply(tmp,buildPubMedAbst))},retmode='xml')
+length(efr2)  ## should be 54
+efr2[[1]]     ## this is an object of type "pubMedAbst"
+help("pubMedAbst-class")
+sapply(efr2,authors)
+sapply(efr2,articleTitle)
+
+
+
 The efetch system still needs some work--this would be the better way
 of getting your results.  If I have time in the next few days, I'll
 look into making sure this works, also.

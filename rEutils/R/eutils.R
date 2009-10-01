@@ -16,7 +16,7 @@ setClass('eFetchQuery',
          representation(dat='list',
                         parser='function'),
          prototype(dat=list(),
-                   parser=function(x) {return(x)}),
+                   parser=function(x) {return(readLines(x))}),
          contains='EUtilsQuery')
 setClass('eLinkQuery',
          contains='EUtilsQuery')
@@ -142,15 +142,8 @@ EUtilsQueryString <- function(params) {
   querystring <- EUtilsQueryString(params)
   urlbase <- EUtilsURLbase('eFetch')
   furl <- paste(urlbase,querystring,sep="")
-  f1 <- url(furl,open='r')
-  if(isOpen(f1)) {
-    browser()
-    result <- object@parser(f1)
-    close(f1)
-    return(result)
-  } else {
-    stop(sprintf('Url [%s] not open',furl))
-  }
+  result <- object@parser(furl)
+  return(result)
 } 
 
 .eInfo <- function(object,...) {
@@ -243,13 +236,12 @@ setMethod('initialize',signature(.Object='eSummaryQuery'),
 
 setMethod('initialize',signature(.Object='eFetchQuery'),
           function(.Object,
-                   parser=function(x) return(x),
                    esearchquery,
+                   parser=function(x) return(x),
                    db=esearchquery@queryparams$db,
                    WebEnv=esearchquery@webenv,
                    query_key=esearchquery@query_key,...)
           {
-            browser()
             callNextMethod(.Object,parser=parser,
                            dat=list(db=db,WebEnv=WebEnv,
                              query_key=query_key,...),.Data=list())
