@@ -1,0 +1,10 @@
+Package: rEutils
+Type: Package
+Title: An R package for interfacing with NCBI eUtilities
+Version: 0.1.0
+Depends: XML, RCurl
+Date: 2009-10-01
+Author: Sean Davis
+Maintainer: Sean Davis <seandavi@gmail.com>
+Description: From the NCBI website, Entrez Programming Utilities are tools that provide access to Entrez data outside of the regular web query interface and may be helpful for retrieving search results for future use in another environment.  This package is designed to provide access to these tools from within R using S4 classes and methods to abstract away the details of URLs, etc.
+License: GPL-2
