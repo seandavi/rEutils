@@ -1,0 +1,67 @@
+%\VignetteIndexEntry{Second-Generation Sequence Data Analysis with R and Bioconductor}
+%\VignettePackage{rEutils}
+
+\documentclass{article}
+
+\usepackage{hyperref,graphicx}
+
+%% \SweaveOpts{keep.source=TRUE,eps=FALSE,include=FALSE,width=4,height=4.5} 
+\newcommand{\Robject}[1]{\texttt{#1}}
+\newcommand{\Rpackage}[1]{\textit{#1}}
+\newcommand{\Rclass}[1]{\textit{#1}}
+\newcommand{\Rfunction}[1]{{\small\texttt{#1}}}
+
+\author{Sean Davis\\[1em]National Cancer Institute,\\National Institutes of Health\\Bethesda, MD, USA\\[1em]
+\texttt{sdavis2@mail.nih.gov}}
+
+\title{\textbf{Using the rEutils Package to Access NCBI EUtilities Web Services}}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Entrez Programming Utilities, the EUtilities, are tools that provide access to Entrez data outside of the regular web query interface and may be helpful for retrieving search results for future use in another environment.  The \Rpackage{rEutils} is a set of classes and methods that facilitates interaction with the EUtilities web services from within R, providing a framework for building pipelines for data processing for NCBI data.
+\end{abstract}
+
+\section{Introduction}
+Second-generation sequencing technologies bring huge data volumes, complex experimental design, algorithmic and data visualization challenges, and data integration nightmares.  While much of the technology is proprietary, the software to deal with the data has largely been left to the open-source community.  The Bioconductor project is one such open-source community that is working on problems related to second-generation sequencing.  The idea is to document workflows for as many use cases as possible, not with the goal of becoming the best tool for any particular workflow, but to provide a set of tools that are useful for sequence data analysis.  These tools are being developed collaboratively within the Bioconductor community.
+
+\section{Use Cases}
+eSearch without usehistory
+<<>>=
+require(rEutils)
+esq = new("eSearchQuery",db='pubmed',term='Irizarry RA[auth]',retmax=500)
+res = eSearch(esq)
+res@count  ## The count of the number of results
+res@idlist  ## The pubmed ids of the result
+
+@ 
+
+<<>>=
+### Note the use of the usehistory='y' parameter
+esq = new("eSearchQuery",db='pubmed',term='Irizarry RA[auth]',retmax=500,usehistory='y')
+res = eSearch(esq)
+esumquery = new("eSummaryQuery",res)
+res2 = eSummary(esumquery)
+
+@ 
+
+<<>>=
+require(annotate)
+p1 <- function(x) {tmp = xmlTreeParse(x);return(xmlApply(tmp,buildPubMedAbst))}
+efr2 = eFetch(res,parser=p1,retmode='xml')
+length(efr2)  ## should be 54
+efr2[[1]]     ## this is an object of type "pubMedAbst"
+sapply(efr2,authors)[1:2]
+sapply(efr2,articleTitle)[1:2]
+@ 
+
+
+\section{sessionInfo}
+<<results=tex>>=
+toLatex(sessionInfo())
+@ 
+
+\end{document}
+

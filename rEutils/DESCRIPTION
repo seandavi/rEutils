@@ -1,7 +1,7 @@
 Package: rEutils
 Type: Package
 Title: An R package for interfacing with NCBI eUtilities
-Version: 0.1.1
+Version: 0.1.2
 Depends: XML, RCurl
 Date: 2009-10-01
 Author: Sean Davis
