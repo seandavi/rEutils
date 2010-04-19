@@ -13,10 +13,8 @@ setClass('eSearchQuery',
 setClass('eSummaryQuery',
          contains='EUtilsQuery')
 setClass('eFetchQuery',
-         representation(dat='list',
-                        parser='function'),
-         prototype(dat=list(),
-                   parser=function(x) {return(readLines(x))}),
+         representation(parser='function'),
+         prototype(parser=function(x) {return(readLines(x))}),
          contains='EUtilsQuery')
 setClass('eLinkQuery',
          contains='EUtilsQuery')
@@ -31,7 +29,7 @@ setClass('EUtilsXMLResult',
          representation(xmlresult='XMLNode'),
          prototype(xmlresult=xmlNode('empty')),
          contains='EUtilsResult')
-setClass('eInfoResult',
+setClass('eInfoResultDbSpecific',
          representation(db='character',
                         menuname='character',
                         description='character',
@@ -39,6 +37,9 @@ setClass('eInfoResult',
                         lastupdate='character',
                         links='data.frame',
                         fields='data.frame'),
+         contains='EUtilsResult')
+setClass('eInfoResultOverview',
+         representation(dbnames='character'),
          contains='EUtilsResult')
 setClass('eSearchResult',
          representation(webenv='CharOrNULL',
@@ -172,7 +173,7 @@ EUtilsQueryString <- function(params) {
     } else {
       links <- data.frame(NULL)
     }
-    result <- new('eInfoResult',
+    result <- new('eInfoResultDbSpecific',
                   db=xmlValue(xmlrawresult[[1]][['DbName']]),
                   menuname=xmlValue(xmlrawresult[[1]][['MenuName']]),
                   description=xmlValue(xmlrawresult[[1]][['Description']]),
@@ -184,7 +185,8 @@ EUtilsQueryString <- function(params) {
   }
   ## no db name given, so just dbnames come back
   if(names(xmlrawresult)=='DbList') {
-    return(xmlSApply(xmlrawresult[[1]],xmlValue))
+    result <- new("eInfoResultOverview",dbnames=xmlSApply(xmlrawresult[[1]],xmlValue))
+    return(result)
   }
 } 
 
@@ -322,3 +324,11 @@ setMethod('eInfo','eInfoQuery',function(object,...) {
   .eInfo(object,...)
 }
 )
+
+setGeneric('eSearch',function(object,...) {
+  standardGeneric('eSearch')})
+
+setGeneric('links',function(object,...) {
+  standardGeneric('links')})
+setMethod('links','eInfoResultDbSpecific',function(object,...) {
+  return(object@links)})
