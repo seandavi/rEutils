@@ -328,7 +328,28 @@ setMethod('eInfo','eInfoQuery',function(object,...) {
 setGeneric('eSearch',function(object,...) {
   standardGeneric('eSearch')})
 
+### eInfoResultDbSpecific methods
 setGeneric('links',function(object,...) {
   standardGeneric('links')})
 setMethod('links','eInfoResultDbSpecific',function(object,...) {
   return(object@links)})
+setGeneric('fields',function(object,...) {
+  standardGeneric('fields')})
+setMethod('fields','eInfoResultDbSpecific',function(object,...) {
+  return(object@fields)})
+setGeneric('description',function(object,...) {
+  standardGeneric('description')})
+setMethod('description','eInfoResultDbSpecific',function(object,...) {
+  return(object@description)})
+setGeneric('count',function(object,...) {
+  standardGeneric('count')})
+setMethod('count','eInfoResultDbSpecific',function(object,...) {
+  return(object@count)})
+setGeneric('db',function(object,...) {
+  standardGeneric('db')})
+setMethod('db','eInfoResultDbSpecific',function(object,...) {
+  return(object@db)})
+setGeneric('lastUpdate',function(object,...) {
+  standardGeneric('lastUpdate')})
+setMethod('lastUpdate','eInfoResultDbSpecific',function(object,...) {
+  return(as.POSIXct(object@lastupdate))})
