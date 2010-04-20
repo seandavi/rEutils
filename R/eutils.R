@@ -6,29 +6,29 @@ singleValueIfElse <- function(test,yes,no) {
 library(RCurl)
 library(XML)
 setClassUnion('CharOrNULL',c('character','NULL'))
-setClass('EUtilsQuery',
+setClass('eUtilsQuery',
          contains='list')
 setClass('eSearchQuery',
-         contains='EUtilsQuery')
+         contains='eUtilsQuery')
 setClass('eSummaryQuery',
-         contains='EUtilsQuery')
+         contains='eUtilsQuery')
 setClass('eFetchQuery',
          representation(parser='function'),
          prototype(parser=function(x) {return(readLines(x))}),
-         contains='EUtilsQuery')
+         contains='eUtilsQuery')
 setClass('eLinkQuery',
-         contains='EUtilsQuery')
+         contains='eUtilsQuery')
 setClass('eInfoQuery',
-         contains='EUtilsQuery')
-setClass('EUtilsResult',
+         contains='eUtilsQuery')
+setClass('eUtilsResult',
          representation(queryparams='list',
                         error='CharOrNULL'),
          prototype(queryparams=list(),
                    error=NULL))
-setClass('EUtilsXMLResult',
+setClass('eUtilsXMLResult',
          representation(xmlresult='XMLNode'),
          prototype(xmlresult=xmlNode('empty')),
-         contains='EUtilsResult')
+         contains='eUtilsResult')
 setClass('eInfoResultDbSpecific',
          representation(db='character',
                         menuname='character',
@@ -37,10 +37,10 @@ setClass('eInfoResultDbSpecific',
                         lastupdate='character',
                         links='data.frame',
                         fields='data.frame'),
-         contains='EUtilsResult')
+         contains='eUtilsResult')
 setClass('eInfoResultOverview',
          representation(dbnames='character'),
-         contains='EUtilsResult')
+         contains='eUtilsResult')
 setClass('eSearchResult',
          representation(webenv='CharOrNULL',
                         query_key='CharOrNULL',
@@ -58,11 +58,11 @@ setClass('eSearchResult',
                    retstart=0,
                    retmax=0,
                    querytranslation=NULL),
-         contains='EUtilsXMLResult')
+         contains='eUtilsXMLResult')
 setClass('eSummaryResult',
-         contains='EUtilsXMLResult')
+         contains='eUtilsXMLResult')
 
-EUtilsURLbase <- function(program=c('eSearch','eSummary','eFetch',
+eUtilsURLbase <- function(program=c('eSearch','eSummary','eFetch',
                             'ePost','eLink','eInfo')) {
   urlbase <- switch(program,
                     eSearch='http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?',
@@ -74,7 +74,7 @@ EUtilsURLbase <- function(program=c('eSearch','eSummary','eFetch',
   return(urlbase)
 }
  
-EUtilsQueryString <- function(params) {
+eUtilsQueryString <- function(params) {
   tmp <- getOption('scipen')
   options('scipen'=15) # to reduce chance of url escaping numbers in scientific notation
   querystring=paste(paste(names(params),curlEscape(as.character(params)),sep="="),collapse="&")
@@ -85,8 +85,8 @@ EUtilsQueryString <- function(params) {
 .eSearch <- function(object,...) {
   params <- c(object,...)
   db <- params$db
-  querystring <- EUtilsQueryString(params)
-  urlbase <- EUtilsURLbase('eSearch')
+  querystring <- eUtilsQueryString(params)
+  urlbase <- eUtilsURLbase('eSearch')
   url <- paste(urlbase,querystring,sep="")
   xmlrawresult <- xmlRoot(xmlTreeParse(getURL(url)))
   if("ERROR" %in% names(xmlrawresult)) {
@@ -119,8 +119,8 @@ EUtilsQueryString <- function(params) {
 .eSummary <- function(object,...) {
   db=object$db
   params <- c(object,...)
-  querystring <- EUtilsQueryString(params)
-  urlbase <- EUtilsURLbase('eSummary')
+  querystring <- eUtilsQueryString(params)
+  urlbase <- eUtilsURLbase('eSummary')
   url <- paste(urlbase,querystring,sep="")
   xmlrawresult <- xmlRoot(xmlTreeParse(url))
   if("ERROR" %in% names(xmlrawresult)) {
@@ -140,8 +140,8 @@ EUtilsQueryString <- function(params) {
 .eFetch <- function(object,...) {
   db=object@dat$db
   params <- c(object@dat,...)
-  querystring <- EUtilsQueryString(params)
-  urlbase <- EUtilsURLbase('eFetch')
+  querystring <- eUtilsQueryString(params)
+  urlbase <- eUtilsURLbase('eFetch')
   furl <- paste(urlbase,querystring,sep="")
   result <- object@parser(furl)
   return(result)
@@ -162,8 +162,8 @@ EUtilsQueryString <- function(params) {
 #####################################
 .eInfo <- function(object,...) {
   params <- c(object,...)
-  querystring <- EUtilsQueryString(params)
-  urlbase <- EUtilsURLbase('eInfo')
+  querystring <- eUtilsQueryString(params)
+  urlbase <- eUtilsURLbase('eInfo')
   url <- paste(urlbase,querystring,sep="")
   xmlrawresult <- xmlRoot(xmlTreeParse(url))
   if("ERROR" %in% names(xmlrawresult)) {
@@ -213,8 +213,8 @@ EUtilsQueryString <- function(params) {
     params[[i]] <- newparams[[i]]
   }
   params <- c(object,...)
-  querystring <- EUtilsQueryString(params)
-  urlbase <- EUtilsURLbase('eLink')
+  querystring <- eUtilsQueryString(params)
+  urlbase <- eUtilsURLbase('eLink')
   url <- paste(urlbase,querystring,sep="")
   xmlrawresult <- xmlRoot(xmlTreeParse(url))
 #  if("ERROR" %in% names(xmlrawresult)) {
@@ -344,7 +344,17 @@ setMethod('eInfo','eInfoQuery',function(object,...) {
 setGeneric('eSearch',function(object,...) {
   standardGeneric('eSearch')})
 
+####################################
+### eUtilsResult methods
+####################################
+setGeneric('params',function(object,...) {
+  standardGeneric('params')})
+setMethod('params','eUtilsResult',function(object,...) {
+  return(object@queryparams)})
+
+####################################
 ### eInfoResultDbSpecific methods
+####################################
 setGeneric('links',function(object,...) {
   standardGeneric('links')})
 setMethod('links','eInfoResultDbSpecific',function(object,...) {
@@ -384,9 +394,11 @@ setMethod('show','eInfoResultDbSpecific',function(object) {
   .showeInfoResultDbSpecific(object)
 })
 
+####################################
 ### eInfoResultOverview methods
+####################################
 setGeneric('dbnames',function(object,...) {
   standardGeneric('dbnames')})
-setMethod('dbnames',function(object,...) {
+setMethod('dbnames','eInfoResultOverview',function(object,...) {
   return(object@dbnames)})
 
