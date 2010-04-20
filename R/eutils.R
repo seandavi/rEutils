@@ -380,7 +380,7 @@ setGeneric('lastupdate',function(object,...) {
 setMethod('lastupdate','eInfoResultDbSpecific',function(object,...) {
   return(as.POSIXct(object@lastupdate))})
 .showeInfoResultDbSpecific <- function(object,...) {
-  cat(sprintf("An object of class: %s\n",class(object)))
+  cat(sprintf('An object of class "%s"\n',class(object)))
   cat(sprintf("db: %s\n",db(object)))
   cat(sprintf("description: %s\n",description(object)))
   cat(sprintf("fields: %d fields available\n",nrow(fields(object))))
