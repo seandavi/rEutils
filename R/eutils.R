@@ -147,6 +147,19 @@ EUtilsQueryString <- function(params) {
   return(result)
 } 
 
+#####################################
+###
+### .eInfo
+### Called by 'eInfo' method
+###
+### Returns polymorphically
+### If a "db" parameter is given, returns
+### detailed information about the database
+### in an eInfoResultDbSpecific class.  If
+### not, then, an eInfoResultOverview class
+### is returned.
+###
+#####################################
 .eInfo <- function(object,...) {
   params <- c(object,...)
   querystring <- EUtilsQueryString(params)
@@ -174,6 +187,7 @@ EUtilsQueryString <- function(params) {
       links <- data.frame(NULL)
     }
     result <- new('eInfoResultDbSpecific',
+                  queryparams=params,
                   db=xmlValue(xmlrawresult[[1]][['DbName']]),
                   menuname=xmlValue(xmlrawresult[[1]][['MenuName']]),
                   description=xmlValue(xmlrawresult[[1]][['Description']]),
@@ -185,7 +199,9 @@ EUtilsQueryString <- function(params) {
   }
   ## no db name given, so just dbnames come back
   if(names(xmlrawresult)=='DbList') {
-    result <- new("eInfoResultOverview",dbnames=xmlSApply(xmlrawresult[[1]],xmlValue))
+    result <- new("eInfoResultOverview",
+                  queryparams=params,
+                  dbnames=xmlSApply(xmlrawresult[[1]],xmlValue))
     return(result)
   }
 } 
@@ -349,7 +365,28 @@ setGeneric('db',function(object,...) {
   standardGeneric('db')})
 setMethod('db','eInfoResultDbSpecific',function(object,...) {
   return(object@db)})
-setGeneric('lastUpdate',function(object,...) {
-  standardGeneric('lastUpdate')})
-setMethod('lastUpdate','eInfoResultDbSpecific',function(object,...) {
+setGeneric('lastupdate',function(object,...) {
+  standardGeneric('lastupdate')})
+setMethod('lastupdate','eInfoResultDbSpecific',function(object,...) {
   return(as.POSIXct(object@lastupdate))})
+.showeInfoResultDbSpecific <- function(object,...) {
+  cat(sprintf("An object of class: %s\n",class(object)))
+  cat(sprintf("db: %s\n",db(object)))
+  cat(sprintf("description: %s\n",description(object)))
+  cat(sprintf("fields: %d fields available\n",nrow(fields(object))))
+  cat(sprintf("links: %d links available\n",nrow(links(object))))
+  cat(sprintf("lastupdate: %s\n",as.character(lastUpdate(object))))
+}
+setMethod('summary','eInfoResultDbSpecific',function(object,...) {
+  .showeInfoResultDbSpecific(object,...)
+})
+setMethod('show','eInfoResultDbSpecific',function(object) {
+  .showeInfoResultDbSpecific(object)
+})
+
+### eInfoResultOverview methods
+setGeneric('dbnames',function(object,...) {
+  standardGeneric('dbnames')})
+setMethod('dbnames',function(object,...) {
+  return(object@dbnames)})
+
